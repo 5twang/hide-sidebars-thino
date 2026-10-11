@@ -9,12 +9,11 @@ the active tab, and restores them when you move on to your notes.
 
 ## Behavior
 
-- Sidebars are collapsed when the active tab is a Thino view, and restored when the active tab changes to
-  anything else.
-- Only sidebars that this plugin collapsed are restored. A sidebar you collapsed yourself stays collapsed.
-- The plugin never fights you: if you manually open a sidebar while Thino is active, it stays open until the
-  next tab switch.
-- Nothing happens on window resize, and nothing happens on startup until the active tab is known.
+- Both sidebars are collapsed while the active tab is a Thino view.
+- Both sidebars are expanded again on any other tab, so leaving Thino always brings your layout back.
+- Sidebars are only touched when the active tab changes: if you open or close one by hand, it stays as you
+  left it until the next tab switch.
+- Window resizing is ignored, and nothing happens until the workspace is ready.
 
 ## Requirements
 
@@ -42,8 +41,8 @@ npm run lint    # official Obsidian plugin lint rules
 
 ## 中文说明
 
-当 Thino 视图处于激活状态时自动收起左右两侧边栏，切换到其他标签页后恢复；只恢复本插件自己收起的
-那侧，不影响你手动折叠的状态。需要已启用 Thino 插件（obsidian-memos），桌面端适用。
+当 Thino 视图处于激活状态时自动收起左右两侧边栏，切到其他标签页时再展开；只在切换标签页时动作，
+你手动开合的侧栏不会被打断。需要已启用 Thino 插件（obsidian-memos），桌面端适用。
 
 ## License
 

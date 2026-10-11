@@ -7,9 +7,6 @@ import { Plugin, WorkspaceLeaf } from 'obsidian';
 const THINO_VIEW_TYPES = ['thino_view', 'thino-super-view'];
 
 export default class HideSidebarsInThino extends Plugin {
-	private hidLeft = false;
-	private hidRight = false;
-
 	onload(): void {
 		this.app.workspace.onLayoutReady(() => {
 			// `activeLeaf` is deprecated, so the active leaf is taken from
@@ -22,7 +19,10 @@ export default class HideSidebarsInThino extends Plugin {
 	}
 
 	onunload(): void {
-		this.restore();
+		// Never leave the user with hidden sidebars after the plugin is gone.
+		if (this.isThinoActive(this.app.workspace.getMostRecentLeaf())) {
+			this.setSidebarsHidden(false);
+		}
 	}
 
 	private isThinoActive(leaf: WorkspaceLeaf | null): boolean {
@@ -31,34 +31,21 @@ export default class HideSidebarsInThino extends Plugin {
 	}
 
 	/**
-	 * Runs whenever the active tab changes. Sidebars are only collapsed while a
-	 * Thino view is active, and only the ones this plugin collapsed are restored
-	 * afterwards, so a sidebar the user collapsed by hand is left alone.
+	 * Runs whenever the active tab changes: both sidebars are collapsed while a
+	 * Thino view is active and expanded again on any other tab. Sidebars are only
+	 * touched on a tab change, so opening or closing one by hand stays as you left
+	 * it until you switch tabs again.
 	 */
 	private apply(leaf: WorkspaceLeaf | null): void {
-		const { leftSplit, rightSplit } = this.app.workspace;
-		if (!leftSplit || !rightSplit) return;
-
-		if (this.isThinoActive(leaf)) {
-			if (!leftSplit.collapsed) {
-				leftSplit.collapse();
-				this.hidLeft = true;
-			}
-			if (!rightSplit.collapsed) {
-				rightSplit.collapse();
-				this.hidRight = true;
-			}
-		} else {
-			this.restore();
-		}
+		this.setSidebarsHidden(this.isThinoActive(leaf));
 	}
 
-	private restore(): void {
+	private setSidebarsHidden(hidden: boolean): void {
 		const { leftSplit, rightSplit } = this.app.workspace;
-		if (!leftSplit || !rightSplit) return;
-		if (this.hidLeft && leftSplit.collapsed) leftSplit.expand();
-		if (this.hidRight && rightSplit.collapsed) rightSplit.expand();
-		this.hidLeft = false;
-		this.hidRight = false;
+		for (const split of [leftSplit, rightSplit]) {
+			if (!split) continue;
+			if (hidden && !split.collapsed) split.collapse();
+			if (!hidden && split.collapsed) split.expand();
+		}
 	}
 }
