@@ -4,6 +4,6 @@
 	"version": "1.0.0",
 	"minAppVersion": "1.2.8",
 	"description": "Hide both sidebars while a Thino view is active, and show them again after you switch to another tab.",
-	"author": "WangYong",
+	"author": "stwang",
 	"isDesktopOnly": true
 }
