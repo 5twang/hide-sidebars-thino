@@ -39,6 +39,17 @@ npm run build   # type-check and build a production main.js
 npm run lint    # official Obsidian plugin lint rules
 ```
 
+## Releasing a new version
+
+`manifest.json` is the source of truth for the version. `main.js` is not committed: it is built and attached to
+the GitHub release, which is what Obsidian downloads.
+
+```bash
+npm version patch      # bumps package.json, manifest.json and versions.json
+git push
+./publish.sh           # builds main.js and creates/updates the GitHub release for the new version
+```
+
 ## 中文说明
 
 当 Thino 视图处于激活状态时自动收起左右两侧边栏，切到其他标签页时再展开；只在切换标签页时动作，
