@@ -41,14 +41,16 @@ npm run lint    # official Obsidian plugin lint rules
 
 ## Releasing a new version
 
-`manifest.json` is the source of truth for the version. `main.js` is not committed: it is built and attached to
-the GitHub release, which is what Obsidian downloads.
+`manifest.json` is the source of truth for the version. `main.js` is not committed: the release workflow
+builds it, signs its build provenance and attaches it to the GitHub release, which is what Obsidian downloads
+(and what the directory checks for attestations).
 
 ```bash
-npm version patch      # bumps package.json, manifest.json and versions.json
-git push
-./publish.sh           # builds main.js and creates/updates the GitHub release for the new version
+./release.sh           # patch bump; ./release.sh minor for a feature release
 ```
+
+That bumps `package.json`, `manifest.json` and `versions.json`, pushes the commit and the tag, then waits for
+the `release` workflow to build, attest and publish the release.
 
 ## 中文说明
 

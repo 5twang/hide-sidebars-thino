@@ -1,0 +1,62 @@
+name: release
+
+# Pushing a tag that matches the version in manifest.json (for example 1.0.1)
+# builds the plugin here, signs the build provenance of main.js, and publishes
+# the release Obsidian downloads from.
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Check that the tag matches manifest.json
+        run: |
+          version="$(node -p "require('./manifest.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$version" ]; then
+            echo "tag $GITHUB_REF_NAME does not match manifest version $version" >&2
+            exit 1
+          fi
+
+      - run: npm run build
+
+      - name: Attest build provenance for main.js
+        uses: actions/attest@v4
+        with:
+          subject-path: main.js
+
+      - name: Verify the attestation we just created
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh attestation verify main.js -R "$GITHUB_REPOSITORY"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" main.js manifest.json --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" main.js manifest.json \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes \
+              --verify-tag
+          fi
+          gh release view "$GITHUB_REF_NAME" --json tagName,assets \
+            --jq '{tag:.tagName, assets:[.assets[].name]}'
