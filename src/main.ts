@@ -22,11 +22,11 @@ export default class HideSidebarsInThino extends Plugin {
 			this.registerEvent(
 				this.app.workspace.on('active-leaf-change', (leaf) => this.apply(leaf))
 			);
-			// Re-evaluate when the window is resized across the threshold.
-			this.registerEvent(
-				this.app.workspace.on('resize', () =>
-					this.apply(this.app.workspace.getMostRecentLeaf())
-				)
+			// Re-evaluate when the window is resized across the threshold. Listen
+			// on `window` directly: `workspace.on('resize')` fires on layout
+			// changes (split/leaf resize), not on window size changes.
+			this.registerDomEvent(window, 'resize', () =>
+				this.apply(this.app.workspace.getMostRecentLeaf())
 			);
 		});
 	}
