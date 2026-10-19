@@ -6,6 +6,13 @@ import { Plugin, WorkspaceLeaf } from 'obsidian';
  */
 const THINO_VIEW_TYPES = ['thino_view', 'thino-super-view'];
 
+/**
+ * Window width (px) below which the sidebars are collapsed while a Thino view
+ * is active. On wider windows the sidebars stay open so the extra room is not
+ * wasted hiding panes the user still wants to see.
+ */
+const WIDTH_THRESHOLD = 1200;
+
 export default class HideSidebarsInThino extends Plugin {
 	onload(): void {
 		this.app.workspace.onLayoutReady(() => {
@@ -14,6 +21,12 @@ export default class HideSidebarsInThino extends Plugin {
 			this.apply(this.app.workspace.getMostRecentLeaf());
 			this.registerEvent(
 				this.app.workspace.on('active-leaf-change', (leaf) => this.apply(leaf))
+			);
+			// Re-evaluate when the window is resized across the threshold.
+			this.registerEvent(
+				this.app.workspace.on('resize', () =>
+					this.apply(this.app.workspace.getMostRecentLeaf())
+				)
 			);
 		});
 	}
@@ -31,13 +44,16 @@ export default class HideSidebarsInThino extends Plugin {
 	}
 
 	/**
-	 * Runs whenever the active tab changes: both sidebars are collapsed while a
-	 * Thino view is active and expanded again on any other tab. Sidebars are only
-	 * touched on a tab change, so opening or closing one by hand stays as you left
-	 * it until you switch tabs again.
+	 * Runs whenever the active tab changes or the window is resized. Both
+	 * sidebars are collapsed while a Thino view is active on a narrow window,
+	 * and expanded again otherwise. Sidebars are only touched on a tab change
+	 * or a resize, so opening or closing one by hand stays as you left it until
+	 * the next such event.
 	 */
 	private apply(leaf: WorkspaceLeaf | null): void {
-		this.setSidebarsHidden(this.isThinoActive(leaf));
+		const shouldHide =
+			this.isThinoActive(leaf) && window.innerWidth < WIDTH_THRESHOLD;
+		this.setSidebarsHidden(shouldHide);
 	}
 
 	private setSidebarsHidden(hidden: boolean): void {
