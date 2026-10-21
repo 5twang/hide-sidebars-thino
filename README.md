@@ -11,9 +11,16 @@ the active tab, and restores them when you move on to your notes.
 
 - Both sidebars are collapsed while the active tab is a Thino view.
 - Both sidebars are expanded again on any other tab, so leaving Thino always brings your layout back.
+- The collapse only happens on windows narrower than a width threshold, so on a big screen the sidebars
+  stay open. The threshold is configurable (default 1200 px).
 - Sidebars are only touched when the active tab changes: if you open or close one by hand, it stays as you
   left it until the next tab switch.
-- Window resizing is ignored, and nothing happens until the workspace is ready.
+- The threshold is re-evaluated on window resize, and nothing happens until the workspace is ready.
+
+## Settings
+
+- **Width threshold (px)** — collapse the sidebars while a Thino view is active when the window is narrower
+  than this value. Raise it (e.g. to 1500) if you want the sidebars to hide even on a larger window.
 
 ## Requirements
 
